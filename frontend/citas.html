@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Citas - Salud Vital</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">Salud Vital</div>
+    <nav>
+      <a href="index.html" class="navlink">Inicio</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="grid">
+      <div class="card form-card">
+        <h2>Agendar / Editar Cita</h2>
+
+        <input id="id" type="hidden" />
+        <label>Paciente
+          <input id="paciente" placeholder="Nombre del paciente" />
+        </label>
+        <label>Fecha
+          <input id="fecha" placeholder="YYYY-MM-DD" />
+        </label>
+        <label>Motivo
+          <textarea id="motivo" rows="3" placeholder="Motivo (opcional)"></textarea>
+        </label>
+
+        <div class="actions">
+          <button id="saveBtn" class="btn" onclick="guardarCita()">Guardar</button>
+          <button id="cancelEdit" class="btn ghost" onclick="limpiarForm()">Cancelar</button>
+        </div>
+      </div>
+
+      <div class="card list-card">
+        <h2>Lista de Citas</h2>
+        <ul id="lista" class="list"></ul>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <small>© Salud Vital</small>
+  </footer>
+</body>
+</html>
