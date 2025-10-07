@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Consultar Resultados - Salud Vital</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="javascript/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">Salud Vital</div>
+    <nav>
+      <a href="index.html" class="navlink">Inicio</a>
+      <a href="citas.html" class="navlink">Citas</a>
+      <a href="resultados.html" class="navlink active">Resultados</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="grid">
+      <div class="card search-card">
+        <h2>🔍 Consultar Resultados</h2>
+        <p class="search-description">Busca tus resultados médicos por nombre de paciente o tipo de examen</p>
+        
+        <div class="search-form">
+          <label>Buscar por Paciente
+            <input id="buscarPaciente" placeholder="Nombre del paciente" />
+          </label>
+          <button id="btnBuscarPaciente" class="btn" onclick="buscarPorPaciente()">Buscar</button>
+        </div>
+
+        <div class="search-form">
+          <label>Buscar por Tipo de Examen
+            <input id="buscarTipo" placeholder="Ej: Hemograma, Radiografía, etc." />
+          </label>
+          <button id="btnBuscarTipo" class="btn" onclick="buscarPorTipo()">Buscar</button>
+        </div>
+
+        <div class="search-form">
+          <button id="btnVerTodos" class="btn ghost" onclick="cargarTodos()">Ver Todos los Resultados</button>
+        </div>
+      </div>
+
+      <div class="card list-card">
+        <h2>📋 Resultados Médicos</h2>
+        <div id="resultadosContainer">
+          <div class="loading" id="loading">Cargando resultados...</div>
+          <ul id="listaResultados" class="list"></ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <small>© Salud Vital</small>
+  </footer>
+
+  <script>
+    const API_RESULTADOS = "http://localhost:8080/api/resultados";
+
+    async function cargarTodos() {
+      mostrarCargando(true);
+      try {
+        const res = await fetch(API_RESULTADOS);
+        const data = await res.json();
+        mostrarResultados(data);
+      } catch (error) {
+        mostrarError("Error al cargar los resultados");
+      } finally {
+        mostrarCargando(false);
+      }
+    }
+
+    async function buscarPorPaciente() {
+      const paciente = document.getElementById("buscarPaciente").value.trim();
+      if (!paciente) {
+        alert("Por favor ingresa el nombre del paciente");
+        return;
+      }
+
+      mostrarCargando(true);
+      try {
+        const res = await fetch(`${API_RESULTADOS}/buscar?paciente=${encodeURIComponent(paciente)}`);
+        const data = await res.json();
+        mostrarResultados(data);
+      } catch (error) {
+        mostrarError("Error al buscar resultados");
+      } finally {
+        mostrarCargando(false);
+      }
+    }
+
+    async function buscarPorTipo() {
+      const tipo = document.getElementById("buscarTipo").value.trim();
+      if (!tipo) {
+        alert("Por favor ingresa el tipo de examen");
+        return;
+      }
+
+      mostrarCargando(true);
+      try {
+        const res = await fetch(`${API_RESULTADOS}/tipo?tipoExamen=${encodeURIComponent(tipo)}`);
+        const data = await res.json();
+        mostrarResultados(data);
+      } catch (error) {
+        mostrarError("Error al buscar resultados");
+      } finally {
+        mostrarCargando(false);
+      }
+    }
+
+    function mostrarResultados(resultados) {
+      const lista = document.getElementById("listaResultados");
+      lista.innerHTML = "";
+
+      if (resultados.length === 0) {
+        lista.innerHTML = '<li class="no-results">No se encontraron resultados</li>';
+        return;
+      }
+
+      resultados.forEach(r => {
+        const li = document.createElement("li");
+        li.className = "resultado-item";
+
+        const info = document.createElement("div");
+        const title = document.createElement("div");
+        title.innerHTML = `<strong>${r.paciente}</strong> • ${r.tipoExamen}`;
+        title.className = "resultado-title";
+
+        const meta = document.createElement("div");
+        meta.innerHTML = `
+          <div class="resultado-meta">
+            <span>📅 Examen: ${r.fechaExamen}</span>
+            <span>📅 Resultado: ${r.fechaResultado}</span>
+            <span>👨‍⚕️ Dr. ${r.medico}</span>
+          </div>
+        `;
+        meta.className = "resultado-meta-container";
+
+        const resultado = document.createElement("div");
+        resultado.innerHTML = `<strong>Resultado:</strong> ${r.resultado}`;
+        resultado.className = "resultado-texto";
+
+        const observaciones = document.createElement("div");
+        if (r.observaciones) {
+          observaciones.innerHTML = `<strong>Observaciones:</strong> ${r.observaciones}`;
+          observaciones.className = "resultado-observaciones";
+        }
+
+        info.appendChild(title);
+        info.appendChild(meta);
+        info.appendChild(resultado);
+        if (r.observaciones) {
+          info.appendChild(observaciones);
+        }
+
+        li.appendChild(info);
+        lista.appendChild(li);
+      });
+    }
+
+    function mostrarCargando(mostrar) {
+      const loading = document.getElementById("loading");
+      loading.style.display = mostrar ? "block" : "none";
+    }
+
+    function mostrarError(mensaje) {
+      const lista = document.getElementById("listaResultados");
+      lista.innerHTML = `<li class="error">${mensaje}</li>`;
+    }
+
+    // Cargar todos los resultados al cargar la página
+    document.addEventListener("DOMContentLoaded", () => {
+      cargarTodos();
+    });
+  </script>
+</body>
+</html>
+
